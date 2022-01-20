@@ -9,10 +9,11 @@ import android.webkit.WebViewClient
 import de.hartz.software.stackoverflowlogin.helper.Helper
 import de.hartz.software.stackoverflowlogin.helper.PersistenceHelper
 import java.util.function.Supplier
+import java.util.logging.Handler
 import kotlin.random.Random
 import kotlin.reflect.KFunction
 
-class WebViewLoginHandler(val context: Context): WebViewClient() {
+class WebViewLoginHandler(val context: Context, val webView: WebView): WebViewClient() {
     companion object {
         val ANDROID_CALLBACK = "ANDROID_CALLBACK"
     }
@@ -27,12 +28,33 @@ class WebViewLoginHandler(val context: Context): WebViewClient() {
         continueAfterPageReload = mutableListOf()
         scripts =
             mutableListOf(
-                // ::getJSLoginCode,
-                // ::getJSLoginAndroidCallback,
+                ::getJSLoginCode,
+                ::getJSLoginAndroidCallback,
                 ::getJSGetBadgeCallback
             )
     }
 
+    fun commandFinished() {
+        android.os.Handler().postDelayed( object: Runnable {
+
+            override fun run() {
+                if (continueAfterPageReload.isNotEmpty()) {
+                    executeJS(continueAfterPageReload.last(), webView)
+                    continueAfterPageReload.removeLast()
+                    return
+                }
+                if (loginTrialsCounter == scripts.size) {
+                    return
+                }
+                val script2 = scripts[loginTrialsCounter]
+                executeJS(script2.call(), webView)
+                loginTrialsCounter++
+                Helper.showNotification(context, "onPageFinished")
+            }
+        }, 1000L
+        )
+
+    }
 
     override fun onReceivedError(
         view: WebView,
@@ -44,14 +66,9 @@ class WebViewLoginHandler(val context: Context): WebViewClient() {
 
     //https://stackoverflow.com/questions/39749235/website-login-by-using-webview-javascript-android
     override fun onPageFinished(view: WebView, url: String) {
-        if (continueAfterPageReload.isNotEmpty()) {
-            executeJS(continueAfterPageReload.last(), view)
-            continueAfterPageReload.removeLast()
-            return
+        if (loginTrialsCounter == 0) {
+            executeJS(getJSLoginAndroidCallback(), webView)
         }
-        val script2 = scripts[loginTrialsCounter % scripts.size]
-        executeJS(script2.call(), view, 2000)
-        Helper.showNotification(context, "onPageFinished")
     }
 
     private fun doSomeRandomActions (webView: WebView) {
@@ -75,11 +92,14 @@ class WebViewLoginHandler(val context: Context): WebViewClient() {
         val functionWrapper = """
             javascript: {
                 async function sleep (duration) {
-                    await Promise.resolve(r => setTimeout(r, duration))
+                    await new Promise(r => setTimeout(r, duration))
                 }
+                /* Async to allow sleep calls. */
                 async function executeCode() {
                         $jsCode
+                        window.$ANDROID_CALLBACK.commandFinished();
                  };
+                 /* Own Jquery as we need async.. May lead to errors or conflicts.. */
                  var myScript = document.createElement('script');
                  myScript.src = 'http://code.jquery.com/jquery-1.9.1.min.js';
                  myScript.onload = function() {
@@ -89,8 +109,10 @@ class WebViewLoginHandler(val context: Context): WebViewClient() {
                  document.body.appendChild(myScript);
             };
         """.trimIndent()
-
-        webView.loadUrl(functionWrapper)
+        // Needed as we get called from PageFinished but as well from callback thread.
+        webView.post {
+            webView.loadUrl(functionWrapper)
+        }
     }
 
     fun getJSLoginCode (): String {
@@ -133,7 +155,7 @@ class WebViewLoginHandler(val context: Context): WebViewClient() {
     
     private fun getJSSearchCode (): String {
         return """
-            console.log('getJSSearchCode');
+           console.log('getJSSearchCode');
            const values = ['Android', 'Fragment lifecycle', 'Bugs', 'Swift', 'Log4J', 'Typescript', 'Mastertheorem', 'Java', 'Spring', 'Backdoors', 'docker', 'Helm', 'typos', 'generator']
            const randomValue = Math.floor(Math.random() * values.length);
 
@@ -161,7 +183,7 @@ class WebViewLoginHandler(val context: Context): WebViewClient() {
         continueAfterPageReload.add("""
             $('button.js-select-badge').click();
             
-            sleep(2000);
+            await sleep(1000);
             const enthusiast = $('span:contains("Enthusiast")').get(1).innerHTML;
             window.$ANDROID_CALLBACK.badges(enthusiast);
             const fanatic = $('span:contains("Fanatic")').get(1).innerHTML;

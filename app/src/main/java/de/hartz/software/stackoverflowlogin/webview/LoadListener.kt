@@ -3,11 +3,12 @@ package de.hartz.software.stackoverflowlogin.webview
 import android.content.Context
 import android.util.Log
 import android.webkit.JavascriptInterface
+import android.webkit.WebViewClient
 import android.widget.Toast
 import de.hartz.software.stackoverflowlogin.helper.PersistenceHelper
 import de.hartz.software.stackoverflowlogin.model.TimeStampNames
 
-class LoadListener(val context: Context) {
+class LoadListener(val context: Context, val webViewClient: WebViewLoginHandler) {
     @JavascriptInterface
     fun login(loginWorked: Boolean) {
         var timestampName = TimeStampNames.LAST_ERROR
@@ -25,5 +26,10 @@ class LoadListener(val context: Context) {
     fun badges(badgeContent: String) {
         Log.e("WebView", "Called Back!" + badgeContent)
         Toast.makeText(context, badgeContent, Toast.LENGTH_LONG).show()
+    }
+
+    @JavascriptInterface
+    fun commandFinished() {
+        webViewClient.commandFinished()
     }
 }

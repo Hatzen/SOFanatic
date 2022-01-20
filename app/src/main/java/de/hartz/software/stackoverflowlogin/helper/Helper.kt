@@ -42,7 +42,8 @@ object Helper {
     }
 
     fun applyWebViewHandler(webView: WebView, context: Context) {
-        webView.webViewClient = WebViewLoginHandler(context)
+        val webViewClient = WebViewLoginHandler(context, webView)
+        webView.webViewClient = webViewClient
         // TODO: Webview still seems to cache login somehow.. invalidating password still leads to being logged in..
         webView.getSettings().setAppCacheEnabled(false)
         webView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE)
@@ -57,7 +58,7 @@ object Helper {
             });
 
         webView.settings.javaScriptEnabled = true
-        webView.addJavascriptInterface(LoadListener(context), WebViewLoginHandler.ANDROID_CALLBACK)
+        webView.addJavascriptInterface(LoadListener(context, webViewClient), WebViewLoginHandler.ANDROID_CALLBACK)
         val googleUrl =
             "https://www.google.com"
         webView.loadUrl(googleUrl) // Trial showing google first for clearing cache..
