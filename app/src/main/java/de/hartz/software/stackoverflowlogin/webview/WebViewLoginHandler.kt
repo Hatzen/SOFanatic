@@ -8,7 +8,9 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import de.hartz.software.stackoverflowlogin.helper.Helper
 import de.hartz.software.stackoverflowlogin.helper.PersistenceHelper
+import java.util.function.Supplier
 import kotlin.random.Random
+import kotlin.reflect.KFunction
 
 class WebViewLoginHandler(val context: Context): WebViewClient() {
     companion object {
@@ -17,12 +19,20 @@ class WebViewLoginHandler(val context: Context): WebViewClient() {
 
     private val JS_EXPRESSION_SUCCESSFUL_LOGIN = "document.getElementsByClassName('js-inbox-button').length > 0"
     private var loginTrialsCounter = 0
-    val scripts =
-        listOf(
-            getJSLoginCode(),
-            getJSLoginAndroidCallback(),
-            getJSGetBadgeCallback()
-        )
+    val scripts: MutableList<KFunction<String>>
+
+    val continueAfterPageReload: MutableList<String>
+
+    init {
+        continueAfterPageReload = mutableListOf()
+        scripts =
+            mutableListOf(
+                // ::getJSLoginCode,
+                // ::getJSLoginAndroidCallback,
+                ::getJSGetBadgeCallback
+            )
+    }
+
 
     override fun onReceivedError(
         view: WebView,
@@ -34,16 +44,14 @@ class WebViewLoginHandler(val context: Context): WebViewClient() {
 
     //https://stackoverflow.com/questions/39749235/website-login-by-using-webview-javascript-android
     override fun onPageFinished(view: WebView, url: String) {
-        // TODO: Some actions call a side change, which will interrupt script execution and may lead to cycles..
-        //  Best bet is to check URL and store every code in functions executing each other?
-
-        // TODO: Do we need to reset this somehow? Otherwise it depends on reinitalization of service or activity
-         // if (loginTrialsCounter < 3) {
-        executeJS(scripts[loginTrialsCounter % scripts.size], view, 2000)
-            // doSomeRandomActions(view)
-            Helper.showNotification(context, "onPageFinished")
-        // }
-        loginTrialsCounter++
+        if (continueAfterPageReload.isNotEmpty()) {
+            executeJS(continueAfterPageReload.last(), view)
+            continueAfterPageReload.removeLast()
+            return
+        }
+        val script2 = scripts[loginTrialsCounter % scripts.size]
+        executeJS(script2.call(), view, 2000)
+        Helper.showNotification(context, "onPageFinished")
     }
 
     private fun doSomeRandomActions (webView: WebView) {
@@ -63,39 +71,41 @@ class WebViewLoginHandler(val context: Context): WebViewClient() {
     }
 
     private fun executeJS(jsCode: String, webView: WebView, timeout: Int = 0) {
+        // Always overwrite executeFunction to clear old commands.
         val functionWrapper = """
             javascript: {
-                function sleep (duration) {
+                async function sleep (duration) {
                     await Promise.resolve(r => setTimeout(r, duration))
                 }
                 async function executeCode() {
                         $jsCode
                  };
-                 setTimeout(executeCode, $timeout)
+                 var myScript = document.createElement('script');
+                 myScript.src = 'http://code.jquery.com/jquery-1.9.1.min.js';
+                 myScript.onload = function() {
+                   console.log('jQuery loaded.');
+                   setTimeout(executeCode, $timeout)
+                 };
+                 document.body.appendChild(myScript);
             };
         """.trimIndent()
 
-        // Always overwrite executeFunction to clear old commands.
-        webView.loadUrl(
-            "javascript: {" +
-                    "function executeCode() {" +
-                        jsCode +
-                    "};" +
-                    "setTimeout(executeCode, " + timeout + ")" +
-                "};"
-        )
+        webView.loadUrl(functionWrapper)
     }
 
-    private fun getJSLoginCode (): String {
+    fun getJSLoginCode (): String {
         val user = PersistenceHelper.getUser(context)
         return  """
-            document.getElementById('email').value = '${user.userName}';
-            "document.getElementById('password').value = '${user.password}';
-            "document.getElementById('submit-button').click();"
+            console.log('getJSLoginCode');
+            if (!$JS_EXPRESSION_SUCCESSFUL_LOGIN) {
+                document.getElementById('email').value = '${user.userName}';
+                document.getElementById('password').value = '${user.password}';
+                document.getElementById('submit-button').click();
+            }
         """.trimIndent()
     }
 
-    private fun getJSLoginAndroidCallback (): String {
+    fun getJSLoginAndroidCallback (): String {
         return """
             console.log('getJSLoginAndroidCallback');
             window.$ANDROID_CALLBACK.login($JS_EXPRESSION_SUCCESSFUL_LOGIN);
@@ -141,64 +151,24 @@ class WebViewLoginHandler(val context: Context): WebViewClient() {
         """.trimIndent()
     }
 
-    private fun getJSGetBadgeCallback (): String {
-        return """
+    fun getJSGetBadgeCallback (): String {
+        val goToUserPage = """
             console.log('getJSGetBadgeCallback');
             $('a.js-site-switcher-button').click();
             $('a.s-user-card--link').get(0).click();
-            
-            // Here the page gets loaded..
-            
+            """
+
+        continueAfterPageReload.add("""
             $('button.js-select-badge').click();
             
-            sleep(2000)
+            sleep(2000);
             const enthusiast = $('span:contains("Enthusiast")').get(1).innerHTML;
             window.$ANDROID_CALLBACK.badges(enthusiast);
             const fanatic = $('span:contains("Fanatic")').get(1).innerHTML;
             window.$ANDROID_CALLBACK.badges(fanatic);  
-        """.trimIndent()
+        """.trimIndent())
+
+        return goToUserPage
     }
 
 }
-
-
-/*
-div#mainbar div.-summary div.-details h2 a
-
-// Open question.
-const scrollposition = Math.floor(Math.random() * 1000 + 567);
-scroll(0, scrollposition);
-const elements = $('div#mainbar div.-summary div.-details h2 a');
-const index = Math.floor(Math.random() * elements.length);
-elements[index].click()
-
-// Open Sidebar
-$('a.js-site-switcher-button').click()
-
-
-
-// Search
-const values = ['Android', 'Fragment lifecycle', 'Bugs', 'Swift', 'Log4J', 'Typescript', 'Mastertheorem', 'Java', 'Spring', 'Backdoors', 'docker', 'Helm', 'typos', 'generator']
-const randomValue = Math.floor(Math.random() * values.length);
-
-if ($('input.js-search-input').length > 0) {
-  $('a.js-search-trigger').click();
-  $('input.js-search-input')[0].value = randomValue;
-  $('form.js-search-container').get(0).submit();
-}
-
-
-if ($('input.js-search-field').length > 0) {
-  $('a.js-searchbar-trigger').click();
-  $('input.js-search-field')[0].value = randomValue;
-  $('form.js-searchbar').get(0).submit();
-}
-
-
-// Profile
-$('a.my-profile').click()
-$('button.js-select-badge').click()
-$('span:contains("Enthusiast")').get(1).innerHTML
-$('span:contains("Fanatic")').get(1).innerHTML
-
- */

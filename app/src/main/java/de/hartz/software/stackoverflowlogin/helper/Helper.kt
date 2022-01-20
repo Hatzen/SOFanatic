@@ -60,8 +60,7 @@ object Helper {
         webView.addJavascriptInterface(LoadListener(context), WebViewLoginHandler.ANDROID_CALLBACK)
         val googleUrl =
             "https://www.google.com"
-        webView.loadUrl(googleUrl) // Trial showing google first..
-        Thread.sleep(2000)
+        webView.loadUrl(googleUrl) // Trial showing google first for clearing cache..
         val stackoverflowUrl =
             "https://stackoverflow.com/users/login?ssrc=head&returnurl=https%3a%2f%2fstackoverflow.com%2f"
         webView.loadUrl(stackoverflowUrl)
