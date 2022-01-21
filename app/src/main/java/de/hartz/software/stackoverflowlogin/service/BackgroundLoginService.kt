@@ -1,27 +1,25 @@
 package de.hartz.software.stackoverflowlogin.service
 
 import android.app.Notification
-import android.content.Intent
-import android.view.WindowManager
-import android.graphics.PixelFormat
-import android.view.Gravity
-import android.os.IBinder
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
+import android.content.Context
+import android.content.Intent
+import android.graphics.PixelFormat
+import android.os.Build
+import android.os.Handler
+import android.os.IBinder
 import android.util.Log
+import android.view.Gravity
 import android.view.ViewGroup
-import android.webkit.*
+import android.view.WindowManager
+import android.webkit.WebView
+import androidx.core.app.NotificationCompat
 import de.hartz.software.stackoverflowlogin.helper.CheckPermissionsHelper
 import de.hartz.software.stackoverflowlogin.helper.Helper
 import de.hartz.software.stackoverflowlogin.helper.PersistenceHelper
 import de.hartz.software.stackoverflowlogin.model.TimeStampNames
-import androidx.core.app.NotificationCompat
-
-import android.app.NotificationManager
-
-import android.app.NotificationChannel
-import android.content.Context
-
-import android.os.Build
 
 
 // https://stackoverflow.com/a/68354848/8524651
@@ -62,18 +60,28 @@ class BackgroundLoginService : Service() {
         val windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         val invisibleLayoutParams = getInvisibleWebViewParams()
         windowManager.addView(wv, invisibleLayoutParams)
+
+        val THIRTY_SECONDS = 15000L
+        Handler().postDelayed({
+            // Service might not get cleared properly as view is keeping it running.
+            cleanUp()
+        }, THIRTY_SECONDS)
+
         return START_NOT_STICKY
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        // TODO: Do we need to remove the view? Most probably we need to..
-        val windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
-        windowManager.removeView(wv)
+        cleanUp()
     }
 
     override fun onBind(intent: Intent): IBinder? {
         return null
+    }
+
+    private fun cleanUp() {
+        val windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+        windowManager.removeView(wv)
     }
 
     private fun getInvisibleWebViewParams(): WindowManager.LayoutParams {

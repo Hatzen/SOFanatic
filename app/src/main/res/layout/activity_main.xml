@@ -5,88 +5,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="20dp"
     tools:context=".activities.MainActivity">
 
-    <androidx.appcompat.widget.LinearLayoutCompat
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_weight="1"
-        >
-        <TextView
-            android:layout_marginBottom="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Last successful login"/>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="-"
-            android:id="@+id/timestamp_success" />
-        <TextView
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="30dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Last error:"/>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="-"
-            android:id="@+id/timestamp_error" />
-        <TextView
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="30dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Last background trigger:"/>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="-"
-            android:id="@+id/timestamp_alarm" />
-    </androidx.appcompat.widget.LinearLayoutCompat>
+        android:background="@color/primary"
+        app:tabIndicatorColor="@color/white"
+        app:tabSelectedTextColor="@color/white"
+        app:tabTextColor="@color/secondary" />
 
-
-    <androidx.appcompat.widget.LinearLayoutCompat
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_weight="1"
-        >
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Username:"/>
-        <EditText
-            android:id="@+id/user"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:tooltipText="Username"/>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Password:"/>
-        <EditText
-            android:id="@+id/pw"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:tooltipText="Password"
-            android:inputType="textPassword"/>
-        <Button
-            android:layout_marginTop="30dp"
-            android:id="@+id/save"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Save and Test"/>
-
-        <Button
-            android:layout_marginTop="30dp"
-            android:id="@+id/showWebview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Show in Webview"/>
-    </androidx.appcompat.widget.LinearLayoutCompat>
-
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 </androidx.appcompat.widget.LinearLayoutCompat>

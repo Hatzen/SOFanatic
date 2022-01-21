@@ -4,56 +4,46 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import de.hartz.software.stackoverflowlogin.helper.Helper
-import de.hartz.software.stackoverflowlogin.helper.PersistenceHelper
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.Lifecycle
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import de.hartz.software.stackoverflowlogin.R
+import de.hartz.software.stackoverflowlogin.fragments.LogFragment
+import de.hartz.software.stackoverflowlogin.fragments.LoginFragment
+import de.hartz.software.stackoverflowlogin.fragments.SettingsFragment
 import de.hartz.software.stackoverflowlogin.helper.CheckPermissionsHelper
-import de.hartz.software.stackoverflowlogin.model.TimeStampNames
-import de.hartz.software.stackoverflowlogin.model.User
+import de.hartz.software.stackoverflowlogin.helper.Helper
 
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var tabStateAdapter: TabStateAdapter
+    private lateinit var viewPager: ViewPager2
+
+    private val tabs = listOf("Log", "Login & Test", "Settings")
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         requestOverlayPermission() // TODO: Request energy optimzer settings.
         Helper.setAlarm(this)
-        setupView()
-        Helper.showDeveloperNotification(this, "Activity started")
-    }
 
-    private fun setupView() {
-        val user = PersistenceHelper.getUser(this)
+        tabStateAdapter = TabStateAdapter(supportFragmentManager, lifecycle)
+        viewPager = findViewById(R.id.viewPager)
+        viewPager.adapter = tabStateAdapter
 
-        val userView = findViewById<EditText>(R.id.user)
-        val passwordView = findViewById<EditText>(R.id.pw)
-        userView.setText(user.userName)
-        passwordView.setText(user.password)
+        val tabLayout = findViewById<TabLayout>(R.id.tabLayout)
 
-        val successView = findViewById<TextView>(R.id.timestamp_success)
-        val errorView = findViewById<TextView>(R.id.timestamp_error)
-        val alarmView = findViewById<TextView>(R.id.timestamp_alarm)
-        successView.setText(PersistenceHelper.getTimeStamp(this, TimeStampNames.LAST_SUCCESS))
-        errorView.setText(PersistenceHelper.getTimeStamp(this, TimeStampNames.LAST_ERROR))
-        alarmView.setText(PersistenceHelper.getTimeStamp(this, TimeStampNames.LAST_ALARM))
-
-        findViewById<Button>(R.id.save).setOnClickListener {
-            val userName = userView.text.toString()
-            val password = passwordView.text.toString()
-            val user = User(userName, password)
-            PersistenceHelper.setUser(this, user)
-            Helper.startService(this)
-        }
-
-        findViewById<Button>(R.id.showWebview).setOnClickListener {
-            startActivity(Intent(this, WebViewActivity::class.java))
-        }
-
+        TabLayoutMediator(tabLayout, viewPager, true) { tab, position ->
+            tab.text = tabs[position]
+        }.attach()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -69,6 +59,20 @@ class MainActivity : AppCompatActivity() {
             val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
             myIntent.data = Uri.parse("package:$packageName")
             startActivityForResult(myIntent, -1)
+        }
+    }
+}
+
+class TabStateAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle) : FragmentStateAdapter(fragmentManager, lifecycle) {
+
+    override fun getItemCount(): Int = 3
+
+    override fun createFragment(position: Int): Fragment {
+        return when (position) {
+            0 -> LogFragment()
+            1 -> LoginFragment()
+            2 -> SettingsFragment()
+            else -> throw RuntimeException("No Fragment supplied")
         }
     }
 }
