@@ -28,6 +28,8 @@ class WebViewLoginHandler(val context: Context, val webView: WebView, val onlyLo
             mutableListOf(
                 ::getJSLoginCode,
                 ::getJSLoginAndroidCallback,
+                ::getJSSearchCode,
+                ::getJSOpenQuestionCode,
                 ::getJSGetBadgeCallback
             )
     }
@@ -72,6 +74,24 @@ class WebViewLoginHandler(val context: Context, val webView: WebView, val onlyLo
             executeJS(getJSLoginCode(), webView)
         }
     }
+
+/*
+    private fun addSomeRandomActions () {
+        val randomActionCount = Random(98).nextInt(2, 11)
+        (0..randomActionCount).forEach {
+            val randomAction = Random(-123167).nextInt(0, 8)
+
+            val randomTimeout = Random(1) .nextInt(581, 4129)
+            val action = when (randomAction) {
+                2 -> getJSSearchCode()
+                4 -> getJSGetBadgeCallback()
+                5 -> getJSOpenSidebarCode()
+                else -> getJSSearchCode() + getJSOpenQuestionCode()
+            }
+            scripts.add({ -> action })
+        }
+    }
+*/
 
     private fun doSomeRandomActions (webView: WebView) {
         val randomActionCount = Random(98).nextInt(2, 11)
@@ -137,39 +157,43 @@ class WebViewLoginHandler(val context: Context, val webView: WebView, val onlyLo
 
     }
 
-    private fun getJSOpenQuestionCode (): String {
+    fun getJSOpenQuestionCode (): String {
         return """
             console.log('getJSOpenQuestionCode');
+            /*TODO: FOr some reason this makes errors..
             const scrollposition = Math.floor(Math.random() * 1000 + 567);
             scroll(0, scrollposition);
-            const elements = '$('div#mainbar div.-summary div.-details h2 a');
+            const elements = $('a.question-hyperlink');*/
+            const elements = $('div#mainbar div.-summary div.-details h2 a');
             const index = Math.floor(Math.random() * elements.length);
-            elements[index].click()
+            elements[index].click();
         """.trimIndent()
     }
 
-    private fun getJSOpenSidebarCode (): String {
+    fun getJSOpenSidebarCode (): String {
         return """
             console.log('getJSOpenSidebarCode');
             $('a.js-site-switcher-button').click()
         """.trimIndent()
     }
     
-    private fun getJSSearchCode (): String {
+    fun getJSSearchCode (): String {
         return """
            console.log('getJSSearchCode');
-           const values = ['Android', 'Fragment lifecycle', 'Bugs', 'Swift', 'Log4J', 'Typescript', 'Mastertheorem', 'Java', 'Spring', 'Backdoors', 'docker', 'Helm', 'typos', 'generator']
+           const values = ['Android', 'Fragment lifecycle', 'Bugs', 'Swift', 'Log4J', 'Typescript', 'Mastertheorem', 'Java', 'Spring', 'Backdoors', 'docker', 'Helm', 'typos', 'generator'];
            const randomValue = Math.floor(Math.random() * values.length);
 
            if ($('input.js-search-input').length > 0) {
              $('a.js-search-trigger').click();
-             $('input.js-search-input')[0].value = randomValue;
+             sleep(1000);
+             $('input.js-search-input')[0].value = values[randomValue];
              $('form.js-search-container').get(0).submit();
            }
 
            if ($('input.js-search-field').length > 0) {
              $('a.js-searchbar-trigger').click();
-             $('input.js-search-field')[0].value = randomValue;
+             sleep(1000);
+             $('input.js-search-field')[0].value = values[randomValue];
              $('form.js-searchbar').get(0).submit();
            }
         """.trimIndent()
