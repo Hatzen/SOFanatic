@@ -8,8 +8,6 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import de.hartz.software.stackoverflowlogin.helper.Helper
 import de.hartz.software.stackoverflowlogin.helper.PersistenceHelper
-import java.util.function.Supplier
-import java.util.logging.Handler
 import kotlin.random.Random
 import kotlin.reflect.KFunction
 
@@ -49,7 +47,7 @@ class WebViewLoginHandler(val context: Context, val webView: WebView): WebViewCl
                 val script2 = scripts[loginTrialsCounter]
                 executeJS(script2.call(), webView)
                 loginTrialsCounter++
-                Helper.showNotification(context, "onPageFinished")
+                Helper.showDeveloperNotification(context, "onPageFinished")
             }
         }, 1000L
         )
@@ -183,7 +181,7 @@ class WebViewLoginHandler(val context: Context, val webView: WebView): WebViewCl
         continueAfterPageReload.add("""
             $('button.js-select-badge').click();
             
-            await sleep(1000);
+            await sleep(1000); /* Await popup opened */
             const enthusiast = $('span:contains("Enthusiast")').get(1).innerHTML;
             window.$ANDROID_CALLBACK.badges(enthusiast);
             const fanatic = $('span:contains("Fanatic")').get(1).innerHTML;

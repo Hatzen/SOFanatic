@@ -16,6 +16,7 @@ object PersistenceHelper {
     private val FILE_NAME = "dump.tmp"
     private val USER = "USER"
     private val PW = "PW"
+    private val NUMBER_OF_DAYS = "NUMBER_OF_DAYS"
 
     init {
         val tz: TimeZone = TimeZone.getTimeZone("UTC")
@@ -54,6 +55,18 @@ object PersistenceHelper {
         val sharedPreferences = getSharedPref(context)
 
         return sharedPreferences.getString(name.timeStampName, "")!!
+    }
+
+    fun storeNumberOfDays (context: Context, numberOfDays: Int) {
+        val sharedPreferences = getSharedPref(context)
+        val editor = sharedPreferences.edit()
+        editor.putInt(NUMBER_OF_DAYS, numberOfDays)
+        editor.apply()
+    }
+
+    fun getNumberOfDays(context: Context): Int {
+        val sharedPreferences = getSharedPref(context)
+        return sharedPreferences.getInt(NUMBER_OF_DAYS, -1)!!
     }
 
     private fun getSharedPref (context: Context): SharedPreferences {

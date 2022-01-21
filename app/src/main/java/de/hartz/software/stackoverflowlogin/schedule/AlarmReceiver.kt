@@ -7,7 +7,6 @@ import android.util.Log
 import de.hartz.software.stackoverflowlogin.helper.Helper
 import de.hartz.software.stackoverflowlogin.helper.PersistenceHelper
 import de.hartz.software.stackoverflowlogin.model.TimeStampNames
-import de.hartz.software.stackoverflowlogin.service.BackgroundLoginService
 
 class AlarmReceiver : BroadcastReceiver() {
     companion object {
@@ -22,7 +21,7 @@ class AlarmReceiver : BroadcastReceiver() {
             Helper.startService(context)
             Helper.setAlarm(context) // Needed for both on Boot AND IdleAndExact reset alarms.
             PersistenceHelper.storeTimeStamp(context, TimeStampNames.LAST_ALARM)
-            Helper.showNotification(context, "AlarmReceiver")
+            Helper.showDeveloperNotification(context, "AlarmReceiver")
         }
     }
 }

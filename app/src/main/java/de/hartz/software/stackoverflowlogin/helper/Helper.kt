@@ -113,8 +113,41 @@ object Helper {
     }
 
     fun showNotification(context: Context, title: String) {
-        val debug = true // TODO: Make a UI Checkbox?
-        if (!(BuildConfig.DEBUG || debug)) {
+        val channelId = "ACTIVATION_INFO"
+        val notification = NotificationCompat.Builder(context, channelId)
+        val intent = Intent(context, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
+
+        notification.setContentIntent(pendingIntent)
+        notification.setSmallIcon(R.mipmap.ic_launcher_round)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            notification.setSmallIcon(R.mipmap.ic_stat_notification)
+            notification.setColor(context.getResources().getColor(R.color.white))
+        } else {
+            notification.setSmallIcon(R.mipmap.ic_stat_notification)
+        }
+
+        notification.setContentTitle(title)
+        notification.setContentText("StackoverflowLogin step finished")
+        notification.setPriority(Notification.PRIORITY_MAX)
+        val notificationManager = (context.getSystemService(AppCompatActivity.NOTIFICATION_SERVICE) as NotificationManager)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                channelId,
+                "Information about last login.",
+                NotificationManager.IMPORTANCE_HIGH)
+            notificationManager.createNotificationChannel(channel)
+            notification.setChannelId(channelId)
+        }
+
+        val notificationResult = notification.build()
+        notificationManager.notify(187, notificationResult)
+    }
+
+    fun showDeveloperNotification(context: Context, title: String) {
+        val debug = false // TODO: Make a UI Checkbox?
+        if (!debug) {
             return
         }
         val channelId = "ACTIVATION_INFO"

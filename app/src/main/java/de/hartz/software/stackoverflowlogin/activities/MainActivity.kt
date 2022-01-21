@@ -1,12 +1,7 @@
 package de.hartz.software.stackoverflowlogin.activities
 
-import android.Manifest
-import android.app.*
-import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Button
@@ -14,20 +9,12 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import de.hartz.software.stackoverflowlogin.helper.Helper
 import de.hartz.software.stackoverflowlogin.helper.PersistenceHelper
 import de.hartz.software.stackoverflowlogin.R
 import de.hartz.software.stackoverflowlogin.helper.CheckPermissionsHelper
 import de.hartz.software.stackoverflowlogin.model.TimeStampNames
 import de.hartz.software.stackoverflowlogin.model.User
-import de.hartz.software.stackoverflowlogin.schedule.AlarmReceiver
-import de.hartz.software.stackoverflowlogin.service.BackgroundLoginService
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.temporal.ChronoUnit
-import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -37,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         requestOverlayPermission() // TODO: Request energy optimzer settings.
         Helper.setAlarm(this)
         setupView()
-        Helper.showNotification(this, "Activity started")
+        Helper.showDeveloperNotification(this, "Activity started")
     }
 
     private fun setupView() {
