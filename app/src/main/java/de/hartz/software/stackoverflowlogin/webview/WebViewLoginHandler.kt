@@ -11,7 +11,7 @@ import de.hartz.software.stackoverflowlogin.helper.PersistenceHelper
 import kotlin.random.Random
 import kotlin.reflect.KFunction
 
-class WebViewLoginHandler(val context: Context, val webView: WebView): WebViewClient() {
+class WebViewLoginHandler(val context: Context, val webView: WebView, val onlyLogin: Boolean = false): WebViewClient() {
     companion object {
         val ANDROID_CALLBACK = "ANDROID_CALLBACK"
     }
@@ -33,6 +33,9 @@ class WebViewLoginHandler(val context: Context, val webView: WebView): WebViewCl
     }
 
     fun commandFinished() {
+        if (onlyLogin == true) {
+            return
+        }
         android.os.Handler().postDelayed( object: Runnable {
 
             override fun run() {
@@ -65,7 +68,8 @@ class WebViewLoginHandler(val context: Context, val webView: WebView): WebViewCl
     //https://stackoverflow.com/questions/39749235/website-login-by-using-webview-javascript-android
     override fun onPageFinished(view: WebView, url: String) {
         if (loginTrialsCounter == 0) {
-            executeJS(getJSLoginAndroidCallback(), webView)
+            // Initial call, next calls will happen to callback.
+            executeJS(getJSLoginCode(), webView)
         }
     }
 

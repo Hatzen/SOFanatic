@@ -47,6 +47,10 @@ class LoginFragment : Fragment() {
         }
 
         view.findViewById<Button>(R.id.showWebview).setOnClickListener {
+            startActivity(Intent(context, WebViewActivity::class.java).putExtra(WebViewActivity.KEY_EXTRA_LOGIN_ONLY, true))
+        }
+
+        view.findViewById<Button>(R.id.simulateWebview).setOnClickListener {
             startActivity(Intent(context, WebViewActivity::class.java))
         }
     }

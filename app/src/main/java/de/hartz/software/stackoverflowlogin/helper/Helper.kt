@@ -4,25 +4,21 @@ import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
+import android.webkit.ConsoleMessage
+import android.webkit.WebChromeClient
+import android.webkit.WebSettings
 import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import de.hartz.software.stackoverflowlogin.BuildConfig
 import de.hartz.software.stackoverflowlogin.R
 import de.hartz.software.stackoverflowlogin.activities.MainActivity
-import de.hartz.software.stackoverflowlogin.webview.LoadListener
-import de.hartz.software.stackoverflowlogin.webview.WebViewLoginHandler
-import android.util.Log
-import android.webkit.ConsoleMessage
-import android.webkit.WebChromeClient
-import android.webkit.WebSettings
-
-import androidx.annotation.NonNull
 import de.hartz.software.stackoverflowlogin.model.TimeStampNames
 import de.hartz.software.stackoverflowlogin.schedule.AlarmReceiver
 import de.hartz.software.stackoverflowlogin.service.BackgroundLoginService
-import java.lang.Exception
-import java.lang.reflect.Method
+import de.hartz.software.stackoverflowlogin.webview.LoadListener
+import de.hartz.software.stackoverflowlogin.webview.WebViewLoginHandler
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -41,8 +37,8 @@ object Helper {
         }
     }
 
-    fun applyWebViewHandler(webView: WebView, context: Context) {
-        val webViewClient = WebViewLoginHandler(context, webView)
+    fun applyWebViewHandler(webView: WebView, context: Context, loginOnly: Boolean = false) {
+        val webViewClient = WebViewLoginHandler(context, webView, loginOnly)
         webView.webViewClient = webViewClient
         // TODO: Webview still seems to cache login somehow.. invalidating password still leads to being logged in..
         webView.getSettings().setAppCacheEnabled(false)
