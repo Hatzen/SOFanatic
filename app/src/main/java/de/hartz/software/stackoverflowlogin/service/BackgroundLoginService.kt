@@ -82,6 +82,7 @@ class BackgroundLoginService : Service() {
     private fun cleanUp() {
         val windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         windowManager.removeView(wv)
+        stopSelf()
     }
 
     private fun getInvisibleWebViewParams(): WindowManager.LayoutParams {
