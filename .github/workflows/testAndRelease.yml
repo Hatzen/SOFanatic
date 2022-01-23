@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # https://stackoverflow.com/questions/62291270/github-actions-remote-rejected-master-master-shallow-update-not-allowed
       - name: make executable
         run: chmod +x gradlew
       - name: Unit tests
