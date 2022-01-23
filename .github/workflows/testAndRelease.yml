@@ -54,18 +54,22 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build -x lint
 
+      #- name: Rename artifacts
+      #  run: |
+      #    cp app/build/outputs/apk/release/app-release.apk SOFanatic.apk
+      #- name: Upload Release
+      #  uses: actions/upload-artifact@master
+      #  with:
+      #    name: Release Apk
+      #    path: SOFanatic.apk
+
       - name: Rename artifacts
         run: |
-          cp app/build/outputs/apk/release/app-release.apk SOFanatic.apk
-      - name: Upload Release
-        uses: actions/upload-artifact@master
-        with:
-          name: Release Apk
-          path: SOFanatic.apk
+          cp app/build/outputs/apk/debug/app-debug.apk SOFanatic.apk
       - name: Upload Debug
         uses: actions/upload-artifact@master
         with:
-          name: Debug Apk
+          name: SOFanatic.apk
           path: app/build/outputs/apk/debug/app-debug.apk
 
   # https://dev.to/ychescale9/running-android-emulators-on-ci-from-bitrise-io-to-github-actions-3j76
