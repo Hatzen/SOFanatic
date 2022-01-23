@@ -5,7 +5,7 @@ name: Main CI CD
 on:
   push:
     branches:
-      - main
+      - master
       - 'releases/**'
 
 jobs:
