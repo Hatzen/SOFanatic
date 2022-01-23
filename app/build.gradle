@@ -10,7 +10,7 @@ android {
         applicationId "de.hartz.software.stackoverflowlogin"
         minSdk 26
         targetSdk 31
-        versionCode 1
+        versionCode readVersionCode()
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -46,4 +46,35 @@ dependencies {
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+}
+
+// https://stackoverflow.com/a/21405744/8524651
+def readVersionCode () {
+    def versionPropsFile = file('../version.properties')
+
+    if (versionPropsFile.canRead()) {
+        Properties versionProps = new Properties()
+        versionProps.load(new FileInputStream(versionPropsFile))
+        def code = versionProps['VERSION_CODE'].toInteger()
+        return code
+    }
+    throw new GradleException("Could not read version.properties!")
+}
+
+tasks.register("incrementVersionCode") {
+    doLast {
+        def versionPropsFile = file('../version.properties')
+        if (versionPropsFile.canRead()) {
+            Properties versionProps = new Properties()
+
+            versionProps.load(new FileInputStream(versionPropsFile))
+
+            def code = versionProps['VERSION_CODE'].toInteger() + 1
+
+            versionProps['VERSION_CODE']=code.toString()
+            versionProps.store(versionPropsFile.newWriter(), null)
+        } else {
+            throw new GradleException("Could not read version.properties!")
+        }
+    }
 }
