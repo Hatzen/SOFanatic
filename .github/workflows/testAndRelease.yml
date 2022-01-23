@@ -1,15 +1,16 @@
-name: Master CI CD
+name: Main CI CD
 
 # using checkout@v2 instead of v1 caus it needs further coniguration
 
 on:
-  pull_request:
-    types: [closed]
+  push:
+    branches:
+      - master
+      - 'releases/**'
 
 jobs:
   UnitTest:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged
     steps:
       - uses: actions/checkout@v2
       - name: make executable
