@@ -1,10 +1,12 @@
-name: Master CI CD
+name: Main CI CD
 
 # using checkout@v2 instead of v1 caus it needs further coniguration
 
 on:
-  pull_request:
-    types: [closed]
+  push:
+    branches:
+      - main
+      - 'releases/**'
 
 jobs:
   UnitTest:
