@@ -77,20 +77,21 @@ object Helper {
 
         val result: Instant
         // Start within the next hour when success is more than a day ago.  Otherwise next day midday.
-        val lastTimestamp = PersistenceHelper.getTimeStamp(context, TimeStampNames.LAST_SUCCESS)
+        val lastTimestamp = PersistenceHelper.getTimeStamp(context, TimeStampNames.LAST_DAY_CHANGED)
 
         var wasErroneousLastTime = true
         if (lastTimestamp != "") {
             val lastTimestampDate = PersistenceHelper.DATE_FORMAT.parse(lastTimestamp)
             wasErroneousLastTime = lastTimestampDate == null || Instant.now().plus(1, ChronoUnit.DAYS).isAfter(lastTimestampDate.toInstant())
         }
-        if (wasErroneousLastTime) {
+        if (!wasErroneousLastTime) {
             // Set alarm for 12AM to not accidentially pass Stackoverflows UTC Time.
             var localDateTime: LocalDateTime =
                 LocalDateTime.ofInstant(Instant.now().plus(1, ChronoUnit.DAYS), ZoneId.systemDefault())
             localDateTime = localDateTime.withHour(12)
             result = localDateTime.atZone(ZoneId.systemDefault()).toInstant()
         } else {
+            Helper.showNotification(context, "Login count didnt changed since" + lastTimestamp)
             result = Instant.now().plus(1, ChronoUnit.HOURS)
         }
 

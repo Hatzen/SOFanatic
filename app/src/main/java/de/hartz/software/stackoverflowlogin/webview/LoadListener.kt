@@ -3,13 +3,10 @@ package de.hartz.software.stackoverflowlogin.webview
 import android.content.Context
 import android.util.Log
 import android.webkit.JavascriptInterface
-import android.webkit.WebViewClient
 import android.widget.Toast
 import de.hartz.software.stackoverflowlogin.helper.Helper
 import de.hartz.software.stackoverflowlogin.helper.PersistenceHelper
 import de.hartz.software.stackoverflowlogin.model.TimeStampNames
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 
 class LoadListener(val context: Context, val webViewClient: WebViewLoginHandler) {
     @JavascriptInterface
@@ -36,8 +33,13 @@ class LoadListener(val context: Context, val webViewClient: WebViewLoginHandler)
                 Helper.showNotification(context, "Number of Days got resetted! :(")
             }
             Helper.showNotification(context, "Number of days logged in: " + numberOfDays)
+            PersistenceHelper.storeNumberOfDays(context, numberOfDays)
+            PersistenceHelper.storeTimeStamp(context, TimeStampNames.LAST_DAY_CHANGED)
+        } else {
+            // If the days count is the same check wether there is need to set the Alarm to every hour.
+            // Especially needed when started after booting.
+            Helper.setAlarm(context)
         }
-        PersistenceHelper.storeNumberOfDays(context, numberOfDays)
     }
 
     @JavascriptInterface

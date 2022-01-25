@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        requestOverlayPermission() // TODO: Request energy optimzer settings.
+        requestOverlayPermission()
         Helper.setAlarm(this)
 
         tabStateAdapter = TabStateAdapter(supportFragmentManager, lifecycle)

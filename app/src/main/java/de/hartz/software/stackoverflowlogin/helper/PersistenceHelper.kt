@@ -6,7 +6,6 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import de.hartz.software.stackoverflowlogin.model.TimeStampNames
 import de.hartz.software.stackoverflowlogin.model.User
-import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -60,6 +59,7 @@ object PersistenceHelper {
     fun storeNumberOfDays (context: Context, numberOfDays: Int) {
         val sharedPreferences = getSharedPref(context)
         val editor = sharedPreferences.edit()
+        // TODO: Store timestamp and warn if it didnt change in the last 24h
         editor.putInt(NUMBER_OF_DAYS, numberOfDays)
         editor.apply()
     }

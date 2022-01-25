@@ -70,11 +70,6 @@ class BackgroundLoginService : Service() {
         return START_NOT_STICKY
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        cleanUp()
-    }
-
     override fun onBind(intent: Intent): IBinder? {
         return null
     }
