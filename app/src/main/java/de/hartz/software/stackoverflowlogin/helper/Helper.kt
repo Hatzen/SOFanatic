@@ -82,7 +82,8 @@ object Helper {
         var wasErroneousLastTime = true
         if (lastTimestamp != "") {
             val lastTimestampDate = PersistenceHelper.DATE_FORMAT.parse(lastTimestamp)
-            wasErroneousLastTime = lastTimestampDate == null || Instant.now().plus(1, ChronoUnit.DAYS).isAfter(lastTimestampDate.toInstant())
+            wasErroneousLastTime = lastTimestampDate == null ||
+                    lastTimestampDate.toInstant().plus(1, ChronoUnit.DAYS).isBefore(Instant.now())
         }
         if (!wasErroneousLastTime) {
             // Set alarm for 12AM to not accidentially pass Stackoverflows UTC Time.
@@ -91,7 +92,9 @@ object Helper {
             localDateTime = localDateTime.withHour(12)
             result = localDateTime.atZone(ZoneId.systemDefault()).toInstant()
         } else {
-            Helper.showNotification(context, "Login count didnt changed since" + lastTimestamp)
+            if (lastTimestamp != "") {
+                Helper.showNotification(context, "Login count didnt changed since" + lastTimestamp)
+            }
             result = Instant.now().plus(1, ChronoUnit.HOURS)
         }
 
